@@ -1,0 +1,22 @@
+This was the output of sizes.c when I ran it on my tablet and my phone.  Both devices
+produced the same output.  My tablet uses an Intel Atom quadcore processor with
+an x86 type instruction set and my phone uses an ARM architecture.
+
+  sizeof( char ): 1
+sizeof( char * ): 4
+  sizeof( short int ): 2
+sizeof( short int * ): 4
+  sizeof( int ): 4
+sizeof( int * ): 4
+  sizeof( long int ): 4
+sizeof( long int * ): 4
+  sizeof( long ): 4
+sizeof( long * ): 4
+  sizeof( long long int ): 8
+sizeof( long long int * ): 4
+  sizeof( float ): 4
+sizeof( float * ): 4
+  sizeof( double ): 8
+sizeof( double * ): 4
+  sizeof( long double ): 8
+sizeof( long double * ): 4

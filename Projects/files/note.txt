@@ -1,0 +1,22 @@
+Some antivirus programs may give you a warning message if you download and
+install an app from a third party rather than the Play Store or perhaps a
+handful of other app distributors.  I use Avast Mobile Security.  Avast
+has given me a warning message when I installed my own software. 
+According to Avast, it does this because only a small number of people
+have downloaded and installed the app.  You should always scan everything
+you download from the Internet before attempting to access it.  Make sure
+your malware scanner is updated to the latest version and that your
+malware definitions file is also up to date.  Make sure to scan all of the
+files in your device's internal storage area as well.  After Avast scanned
+my app it was satisfied that my app was not a threat.  All of my apps are
+released with the full source code so you can easily go in and look around
+to see what's inside for yourself.  I try to add plenty of comments to
+help people understand what the program is doing.  If you have questions
+about what a certain function does then you could always read the man page
+for that function.  Type "man function_name" without the quotes into your
+browser's URL box and select the appropriate option from the search
+results.  If you have questions about the behavior of your malware scanner
+you should certainly try to contact the software developer that made it. 
+You have my permission to share all of my apps with your malware scanner's
+developers if they request that.  My software is released to everyone
+everywhere as open source, free of charge, and free of ads.

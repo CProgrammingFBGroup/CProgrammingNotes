@@ -1,0 +1,174 @@
+Lesson: Pointers and Functions
+Level: Easy
+
+In this lesson I intend to discuss pointers and the use of functions.  Some posts have asked users what they thought the most difficult concept in C was for them.  Many people answered saying that they thought pointers were difficult to understand.  Pointers don't have to be scary or mysterious, but they do need to be understood if you're going to be proficient in C.
+
+A variable holds a value.  Different data types exist and each data type is for use with a certain kind of data.  An integer holds positive numbers, negative numbers, or zero, unless it is unsigned, in which case it will not be used to hold negative numbers, but it will not hold a fraction of a number.  A floating point number can hold a number with a fractional component, expressed as a decimal.
+
+Different data types use different amounts of memory.  An integer may default to a 32 or 64 bit number depending on the computer it is used on.  A char type will use 8 bits.  A short int will use 16 bits.  A long int should use 32 bits.  A long long int should use 64 bits.  An optional label that specifies whether to use the sign bit as such or to use it to increase the range of the data type may be used.  You may use signed or unsigned.  If you want to use twice the range in a long int, but only be able to hold non-negative numbers, then you could declare the variable as: unsigned long int num;
+
+It is also possible to declare an int as long num; or long int num; or just int num;  All three should do the same thing.
+
+A float type uses 32 bits.  A double type uses 64 bits.  A long double uses 80 bits.  To the best of my knowledge, a long long double does not exist in standard C.
+
+A pointer variable will use 32 or 64 bits depending on whether the computer using it is using a 32 or 64 bit architecture.  This will be the case regardless of the data type that the pointer points to.  A pointer that points to an int will use the same amount of memory as a pointer that points to a long double or even a lengthy character array.
+
+The computer may use a little extra memory for padding and alignment, but that can get a little complicated so we're not going to go into that here.
+
+One byte uses 8 bits.  One word uses 2 bytes.  One long word, or double word, uses 4 bytes.  One quad word uses 8 bytes.
+
+A pointer is declared by adding a star character * immediately before the variable's name.  If we wanted a pointer to an integer then we would say: int *ptr; if we wanted to call the variable ptr.
+
+The & character accesses the address of a variable or a function.  If I had an integer number defined as int num; and a pointer to an integer defined as int *ptr; then I could store the address of the variable num in the pointer ptr by saying: ptr = &num;  yes, it's really that easy.  Now I can indirectly access the value stored in the variable num by dereferencing the pointer ptr by saying: *ptr = 4;  Now if I used printf( "num: %d.\n", num ); this would print 4.
+
+If you do this without first initializing num then your compiler is likely to complain.  You could use int num = 0; when declaring num to prevent this.
+
+Every variable holds a value, but the value in a pointer variable is an address.  Unless it is a null pointer it holds the address of the memory used by another variable, in this case, num.  Prior to initialization, a variable's value is undefined.  A pointer can hold 0, usually cast as a void pointer type.  This is done to initialize a pointer that isn't pointing to anything or to indicate an error condition such as when a call to malloc() fails.  In C, another name for an address value stored in a pointer variable is called a reference because it references or makes reference to the memory space used by another variable.
+
+When passing num to a function: function_name( num ); this places the value held by the variable num on the stack so it can be accessed by function_name().  Local variables, unless they are defined as static, are stored on the stack and accessed by internal system registers, after the program is compiled of course.
+
+Passing the variable num to function_name() in this way creates a local copy of the variable num inside the function function_name() and that local copy will go away after the function ends.  If function_name() changes its own local copy of num then that action will not change the value of num in the function that called function_name().  In C, this is called passing by value because the value stored in the variable num is placed on the stack.
+
+Let's say we wanted function_name() to be able to change the value of the variable num that exists as a local variable in the function that calls function_name().  We could use function_name( ptr ); instead, provided a couple of minor modifications to function_name() are made to accommodate this change.  Now when function_name() dereferences the pointer ptr by using a * character next to the variable name, it can access the memory used by the variable num that exists as a local variable in the function that called function_name().
+
+Since the value stored in the pointer variable ptr is an address, which in C is also called a reference, when we place the reference value stored in ptr on the stack we call this passing by reference because an address, or reference, to the variable num, is placed on the stack instead of the value stored in the variable num.
+
+Whatever the term "reference" may mean in another language such as C++ or whatever else is really quite irrelevant.  Regardless of what something is called in another programming language, this is what it is called in C.  It is important that you do not become confused by this this.  We had quite a debate a while back about whether passing by reference was possible in C because of another data type known as a reference in another programming language.
+
+Granted, the value stored in the pointer variable ptr is placed on the stack, but that value is an address, or reference.  It really depends on the person's perspective.  What is the function function_name() trying to access, the value of the pointer ptr or the value of the integer num?  Notice that when a pointer is dereferenced by using a * character next to the variable name it is called dereferencing.  Why is that?  Because the pointer variable's value is a reference that refers to, or points to, the memory space used by another variable that holds the value that the function is trying to access.
+
+When the argument passed to a function, by placing it on the stack, is the value the function hopes to directly access, this is called passing by value.  When the argument passed to a function, by placing it on the stack, is a reference to the memory location that stores the value the function hopes to indirectly access by dereferencing a pointer variable, this is called passing by reference.
+
+These are the meanings of these two terms when used in C.  The function function_name() really doesn't care what value is stored in the pointer variable ptr, unless it is a null pointer.  As long as function_name() can access the value stored in num, the function has what it needs.  So it comes down to this: what is the function trying to access?  The value of num or the value of ptr?  If it needs the value of num and it uses a reference value stored in ptr to get to it then it uses that reference that was passed to it on the stack, hence the term passing by reference.  If it needs the value of num and that value was passed to the function by placing it on the stack then it no longer uses a reference because it already has the value it requires, hence the term passing by value.
+
+If I wanted to call a simple function to return the result of an operation I could use something like this:
+
+#include <stdio.h>
+
+int add_two( int num1, int num2 );
+
+int main( void )
+{
+     int num1, num2, num3;
+
+     num1 = 5;
+     num2 = 4;
+     num3 = add_two( num1, num2 );
+     printf( "num3: %d.\n", num3 );
+     return 0;
+}
+
+int add_two( int num1, int num2 )
+{
+     return ( num1 + num2 );
+}
+
+Now when this program is run it will print: 9.
+
+Prototyping the function as: int add_two( int num1, int num2 ); can also be written without the variable names: int add_two( int, int );, but the variable names must be specified when the function is defined as it is just after the function main() so you have variable names to use when accessing the function's local variables.  The variable names used in the function prototype do not need to be the same as those used when the function is defined, since they are ignored in the prototype, but they really should be, if you use them, to avoid any confusion.
+
+A function does not need to take any arguments.  When this is the case, a function may be defined as int function_name( void ), if it returns an int as in this example, or just as int function_name().
+
+A function does not need to return a value either.  In such a case the function is defined as void function_name( void ) or just void function_name(), of course also presuming that this function isn't accepting any values either.  This can be useful if the function performs something simple, like perhaps printing a prompt, or works with global variables.
+
+A function can accept and return other data types too.  Let's say we wanted a function that accepted two doubles and an int and to return an int.  Such a function would be defined as int function_name( double num1, double num2, int num3 ).  We can define a function that returns a pointer by using a * character right before the name of the function.  Let's say we wanted a function that returned a pointer to a character array, commonly known as a string.  We could define it by saying: char *make_a_string( int num ) and the function could, for example, allocate some memory, or use static memory, and return num expressed as a string.
+
+It might look something like this:
+
+char *make_a_string( int num )
+{
+     static char str[ 12 ];
+     int ret;
+
+     ret = sprintf( str, "%d", num );
+     return str;
+}
+
+Now I could use printf( "%s.\n", make_a_string( 5 ) ); which would produce the same result as using printf( "%d.\n", 5 );  Obviously this has been done to show an example of a function that returns a character string.
+
+Keep in mind that any local variables in a function, whether they are created by passing arguments to the function on the stack or defined as local variables like ret is in make_a_string(), unless the variable is defined as static, such variables will not exist after the function ends and any memory that was used by any such variables must now be considered undefined and the memory is therefore no longer safe for the calling function to use.
+
+When a function defines its own local variables, the memory used by those variables is part of the stack.  All local variables should be defined at the beginning of a function.  While it is possible to define a variable part way into a function, including inside a set of curly braces { } to limit the scope of the variable, this practice is not recommended as it can make the code harder to follow.  Declaring all of the local variables at the beginning of a function allows the compiler to allocate space for all of those local variables with a single instruction that changes the value held in the stack pointer, an internal system register.  This can help to increase the speed and efficiency of your program.
+
+What if you want your function to change the value of a variable or return more than one value?
+
+If you pass pointers to your function then the function can use the variables that belong to the function that called it.  Let's say that you have: void add_two( int num1, int num2, int *num3 ).
+
+Now call the function with add_two( num1, num2, &num3 );
+
+Using the & character sends the address of, and therefore a pointer to, num3 to add_two().
+
+void add_two( int num1, int num2, int *num3 )
+{
+     *num3 = num1 + num2;
+     return;
+}
+
+Use of return in this case is optional since this function does not return a value.
+
+Your function can return an indication of success or failure, as many do, by returning an int while changing other variables by accepting pointers to them.
+
+int read_input( char *str, int size )
+{
+     int loop;
+     int ret;  /* return value */
+
+     if ( str == NULL )
+     {
+          return 1;  /* We can't use a null pointer here. */
+     }
+     if ( size < 2 )
+     {
+          return 1;  /* We don't have enough room. */
+     }
+     do
+     {
+          loop = 0;
+          if ( fgets( str, size, stdin ) == NULL )
+          {
+               return 1;  /* Something went wrong. */
+          }
+          ret = strlen( str );
+          if ( ret == 0 )
+          {
+               return 1;  /* The string is empty. */
+          }
+          if ( ret == 1 && str[ 0 ] == '\n' )
+          {
+
+               /* There was a stray newline in the buffer. */
+
+               loop = 1;
+          }
+          else
+          {
+               ret--;
+               if ( str[ ret ] == '\n' )
+               {
+                    str[ ret ] = 0;  /* Remove the newline. */
+               }
+          }
+     }    while( loop == 1 );
+     return 0;
+}
+
+This function will need the program to include the header file string.h in order to use the string function strlen().
+
+Let's say you wanted to change multiple values.  You could use something like this:
+
+void left_rotate3( int *num1, int *num2, int *num3 )
+{
+     int tmp;
+
+     tmp = *num1;
+     *num1 = *num2;
+     *num2 = *num3;
+     *num3 = tmp;
+     return;
+}
+
+Now the function that called left_rotate3() will have the values of the three variables that it passed to left_rotate3() rotated.  This will change the values of the variables held in the function that called left_rotate3().
+
+If you have any questions about the contents of this file, please let me know.  Perhaps I can add a few things to answer your questions.  For more examples of how to call functions, including functions that use pointers, please take a look at convert.c in this group's examples directory on GitHub.
+
+<EOF>

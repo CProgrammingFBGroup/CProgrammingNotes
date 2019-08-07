@@ -1,0 +1,361 @@
+Lesson title: Conditions
+Level: Simple
+
+In this lesson we're going to talk about conditions, also known as condition
+testing.
+
+A computer program needs to be able to make decisions based on available
+information, whether that information be supplied by the user, the computer
+system, or its own variables.  This happens in a handful of different ways,
+but the method itself is pretty simple.
+
+What the code really needs to determine is whether the result of the test is
+true or false.  False is zero.  True is usually considered to be one, but can
+be anything other than zero.
+
+So if we had:
+
+int num;
+
+num = 0;
+if ( num )   <- This will say false.
+
+But if we had:
+
+int num;
+
+num = 1;
+if ( num )   <- This will say true.
+
+And if we used:
+
+int num;
+
+num = 218;
+if ( num )   <- This will also say true.
+
+What part will run in this sequence?
+
+if ( 1 && 2 )
+{
+     printf( "Option 1 used.\n" );
+}
+else if ( 0 && 3 )
+{
+     printf( "Option 2 used.n" );
+}
+else
+{
+     printf( "Option 3 used.n" );
+}
+
+The code here will use option 1.  It would never even consider the other
+options because of the way the if-else if-else logic works.
+
+But what if we did it this way:
+
+if ( 1 && 2 )
+{
+     printf( "Option 1 used.\n" );
+}
+
+if ( 0 && 3 )
+{
+     printf( "Option 2 used.\n" );
+}
+
+if ( 4 || 5 )
+{
+     printf( "Option 3 used.\n" );
+}
+
+In this case, options 1 and 3 would be used.  Why is that?  Let's consider
+the first if() statement.  The && means a logical AND operation, but not a
+bit-wise AND which uses a single & and does something else.  Both 1 AND 2 are
+non-zero so the condition inside the if() statement is true so the code in
+the curly braces will be run.
+
+In the second if() statement, 0 AND 3 is false because for an AND to work
+both conditions must be true and zero is always false.  As a result the code
+in the curly braces in the second if() statement will never run.
+
+What about the third if() statement?  The symbol || means a logical OR, but
+not a bit-wise OR which uses a single |, and either 4 OR 5 needs to be
+non-zero.  Obviously both of them are non-zero so the if() statement's
+condition is true and the code in the curly braces will be run.
+
+What about:
+
+if ( 0 || 3 )
+
+This will work because 3 is non-zero so any code within the curly braces of
+such an if() statement would be run.
+
+Programs don't usually use numbers like this.  The can, but they normally use
+variables like the integer num in the beginning of this lesson.  When a
+program uses a number, it will normally use 1 and in a loop of some kind
+which will cause the program to run that section of code forever, or at least
+until the program uses a break statement.  It can work like this:
+
+for( num = 0; 1; num++ )
+{
+     ...code does something here...
+     if ( num == 20 )
+     {
+          break;
+     }
+}
+
+Now in such a simple case, num == 20 would normally be used instead of 1 in
+the middle section of the for() loop.  This example was given to show how 1
+can be used as a condition to make a loop run forever until break is used.
+
+In a for() loop there are three sections.  The first section should be used
+to initialize any variables used in the loop.  The second should be used as
+the loop condition.  The loop condition will be tested at the top of the loop
+to see if it needs to run.  The third section should be used to give
+instructions to be processed after each time the loop is run.  Multiple
+instructions in the first and third sections should be separated with a
+comma:
+
+for( num1 = 0, num2 = 1; num1 < 5; num1++, num2++ )
+{
+     ...code goes here...
+}
+
+In this example, num1 is set to zero and num2 is set to one.  Technically,
+when something is set to zero it is said to be cleared or cleared to zero.
+
+Use the middle section just like you would use an if() statement.  You can
+set up multiple conditions to be tested at the top of each pass around the
+loop just like you would inside the parentheses of an if() statement.
+
+The third section contains instructions that should be run at the bottom of
+each pass around the loop before the loop condition or conditions in the
+middle section are tested.  In this case, both num1 and num2 are incremented.
+ This is the same as saying num1 = num1 + 1, but using num1++ is easier.  You
+could also use another shorthand version which is num1 += 1;
+
+It is likely that the CPU will have a special instruction or opcode for
+incrementing a number by one and another for decrementing, or reducing the
+value of, a number by one.  A good compiler will use these instructions
+whenever possible in the object code it produces if those instructions exist
+on the computer architecture that you are using.  This can result in faster,
+more efficient code when compared to using num = num + 1.
+
+A compiler can usually produce two different types of output files.  It will
+always be able to produce object code when it successfully compiles your
+source code, but it may be able to produce assembly code instead.  If this is
+done, the resulting assembly language source code file is processed by an
+assembler which in turn produces the object code that the compiler would
+normally produce.  This can be done for two different reasons.  Perhaps you
+would like to see how your C source code would look if it was translated into
+assembly language.  The other reason would be if you didn't trust your
+compiler to produce high quality object code and you wanted to use an
+assembler to improve the speed and efficiency of the program.  The object
+code is then processed by a linker that combines any functions found in any
+library files that your program wants to call.
+
+A for() loop does not really need to use every or even any of the three
+sections.  The following loop would run forever unless a break statement was
+used somewhere in the code in the loop:
+
+for( ;; )
+{
+     ...code goes here...
+}
+
+We should also talk about do-while() loops and while() loops.  A do-while()
+loop will always be entered and get a chance to run the code inside the loop,
+but a while() loop might not.  This is because a do-while() loop tests its
+condition or conditions at the bottom of the loop, after the code in the loop
+has had a chance to run, while a while() loop tests its condition or
+conditions at the top of the loop, before the code in the loop has a chance
+to run.
+
+This is how the two types of loops look:
+
+do
+{
+     ...code goes here...
+}    while( condition );
+
+while( condition )
+{
+     ...code goes here...
+}
+
+In both of these examples, the 'condition' is just like the condition or
+conditions used in an if() statement.  If you used:
+
+while( 1 )
+{
+    ...code goes here...
+}
+
+such a loop would run forever, unless a break statement was used somewhere in
+the loop.
+
+You could use something like this:
+
+while( ( num1 && num2 ) || ( num3 && num4 ) )
+{
+     ...code goes here...
+}
+
+In this while() loop either num1 AND num2 must be true OR num3 AND num4 must
+be true.  Remember, true is anything that is non-zero.  If num1 AND num2 are
+both true then the loop will run.  If either num1 or num2 are false, even if
+both are false, then num3 and num4 will be checked.  Then if num3 AND num4
+are both true the loop will run.
+
+Another way to test a condition is with a switch() and case statements. 
+Let's say the program had asked the user for input, stored it in an integer
+named choice, and made sure it was valid.  Then the program could use a
+switch() and case statements:
+
+switch( choice )
+{
+     case  1: ret = option_1();
+              if ( ret == 1 )
+              {
+                   printf( "That didn't work so well.\n" );
+              }
+              break;
+     case  2: option_2();
+              break;
+     case  3: option_3( num );
+              break;
+     default: printf( "\
+The default case should not have been used.\n" );
+}
+
+The three functions named option_1(), option_2(), and option_3() were only
+used for example purposes.  A newline in a quoted string can be escaped with
+a backslash to allow the programmer to break up longer lines of code to fit
+everything on the screen.  Certain characters in a quoted string also need to
+be escaped if the programmer wishes to use them so as to tell the compiler to
+otherwise ignore their special meanings.  Such special characters include a
+single quote, \', a double quote, \", and a backslash, \\.  If the user wants
+to print a percent sign, %, with a function like printf() then two percent
+signs should be used together, %%.
+
+There is one more thing I'd like to mention before this lesson is over. 
+Calling a function from inside an if() statement is also quite common.  Let's
+say we wanted to make sure the user provided valid input.  We might use this:
+
+if ( scanf( "%d", &num ) != 1 )
+{
+     fprintf( stderr, "That is not acceptable input.\n" );
+     exit( EXIT_FAILURE );
+}
+
+The term EXIT_FAILURE is defined as 1 while the term EXIT_SUCCESS is defined
+as 0.  Using exit( EXIT_FAILURE ); in this example is the same as using exit(
+1 ); because the preprocessor will substitute 1 for EXIT_FAILURE.  The
+function scanf() will return a value indicating the number of arguments read
+that matched the codes in the descriptor string.  The function fprintf() will
+print output to a file, in this case stderr instead of stdout.  Using
+fprintf( stdout, "Hello.\n" ); will do the same thing as using printf(
+"Hello.\n" ); would.  Your program will usually start with three open file
+streams.  Stream stdin is file number 0 and is used by your program for
+reading input, usually from the keyboard, but the user may have redirected a
+file into your program instead.  The second file stream is stdout.  This is
+file number 1 and is used for the program's output.  The third file stream is
+stderr and is file number 2.  This output stream is used to print error
+messages or anything you want to be printed to the screen if your program's
+normal output is redirected to a file.  It is possible to redirect standard
+error to a file as well.  The user can direct stdout to one file and stderr
+to another file, or send the output from both output streams to the same
+file.  This is done on the command line when the program is run.  Let's say
+your program's name was myprogram:
+
+system prompt> myprogram < infile 1> outfile 2> errorfile
+
+In this case the user has redirected stdin from a file named infile so the
+contents of the file infile will be read as the program's input as if the
+contents of the file were typed into the keyboard as the program was being
+run and sent messages printed to stdout to a file named outfile and anything
+from stderr to a file named errorfile.  The number 1 is optional and may be
+omitted.  If the user wanted to send both output streams to the same file the
+user could use this instead:
+
+system prompt> myprogram >& outfile
+
+or:
+
+system prompt> myprogram > outfile 2>&1
+
+Using a single angle bracket for file redirection of an output file will
+cause a new file to be created.  If a file with that name already exists it
+will be truncated to zero bytes first.  Using two angle brackets together
+when redirecting output to a file will cause a new file to be created if it
+does not already exist or will cause the program's output to be appended to
+an existing file with the specified name:
+
+system prompt> myprogram >> outfile
+
+In this case stdout, but not stderr, was redirected to the file outfile.  Any
+output from the program written to stdout will be appended to the file
+outfile instead of being printed to the screen.
+
+In the example using scanf() above, the program should use some kind of
+bounds testing to make sure the number the user entered was in an acceptable
+range.  This is called bullet proofing and all good quality code does this. 
+What if the program had five menu options and asked the user to pick an
+option:
+
+if ( num < 1 || num > 5 )
+{
+     fprintf( stderr, "That is not an available menu option.\n" );
+     exit( EXIT_FAILURE );
+}
+
+In all likelihood, a program will probably ask the user to try entering their
+input again instead of exiting and will use a loop to do this:
+
+Presume: int exit_loop, choice;
+
+exit_loop = 0;
+do
+{
+     printf( "Please enter a number between 1 and 5.\n>> " );
+     fflush( stdout );
+     if ( scanf( "%d", &choice ) != 1 )
+     {
+          fprintf( stderr, "That is not acceptable input.\n" );
+
+          /* Clear any unacceptable input from the buffer. */
+
+          while( !feof( stdin ) && !ferror( stdin ) &&
+                 fgetc( stdin ) != '\n' );
+     }
+     else if ( choice < 1 || choice > 5 )
+     {
+          fprintf( stderr, "That is not an available option.\n" );
+     }
+     else
+     {
+          exit_loop = 1;
+     }
+
+     /* This could happen if the user */
+     /* redirects a file to stdin.    */
+
+     if ( feof( stdin ) || ferror( stdin ) )
+     {
+          exit( EXIT_FAILURE );
+     }
+
+}    while( !exit_loop );
+
+The function fflush() was called because the string being printed to stdout
+did not end in a newline character so it was necessary to call fflush() to
+print the prompt ">> " before calling scanf().  Using ! means a logical NOT
+operation and changes a non-zero value to zero and changes a zero value to
+one.
+
+This concludes our lesson on conditions.  I hope our programmers who are just
+getting started with C have found it to be helpful.
+
+<EOF>

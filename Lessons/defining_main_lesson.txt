@@ -1,0 +1,76 @@
+Lesson title: Defining main
+Level: Simple
+
+There seems to be some confusion about how to define the main() function in C.  In this lesson I hope to clear that up.
+
+The main() function is the defined entry point to every C program.  Yes, your compiler may add a function called _start() that will call main(), but it is proper to define main() in your C source code as the entry point of your C program.
+
+The main() function _must_ return an integer value in every case, no matter what.  It is not acceptable to define main() to return void and therefore return nothing.  The current C standard makes this very clear in 5.1.2.2.1.
+
+The main() function may be defined to accept two variables or nothing at all (void).  You may use int main( void ) if you don't want your program to be able to accept and process command line arguments.
+
+You may use int main( int argc, char **argv ) or int main( int argc, char *argv[] ) if you want your program to be able to accept and process command line arguments.  No other way of defining main() is acceptable so choose one of these ways to define main().
+
+The variable argc stands for argument count.  The variable argv stands for argument values.  Variable names in C, in general, should tell whoever is reading the source code something about how the variable is used or what the variable holds.
+
+The variable argc, if defined by a program, will hold the number of command line arguments that were used when the program was run, including the name of the program itself.  The variable argv, if defined by a program, is a two dimensional character array, in other words, an array of strings.
+
+In C, a character string is just an array of characters that ends with a byte holding a value of zero.  This zero, or null, value is called a delimiter, and it tells whatever function that is using the character array that the end of the array has been reached.  Continuing to try to process data beyond the end of an array, or any memory allocated to any data type, can cause your program to run wild and do a lot of crazy things, including crashing because of a segmentation fault.  A segmentation fault occurs when your program attempts to access memory outside of any memory space defined by and given to it by the operating system (kernel).
+
+If you are running Microsoft Windows:
+
+Let's say you name your program SHOW_ARGS.C and compile it.  If your program is in the C:\C directory then your compiled program will be named C:\C\SHOW_ARGS.EXE so argv[ 0 ], if your program accepts command line arguments, will hold "C:\C\SHOW_ARGS.EXE".
+
+If you are running Linux or UNIX:
+
+Let's say you name your program show_args.c and compile it, specifying a file name of show_args so you don't end up with the default file name of a.out, and you are using the directory /user/bob/C then your program's name will be /user/bob/C/show_args and argv[ 0 ], if your program accepts command line arguments, will hold "/user/bob/C/show_args".
+
+I do not use Microsoft Windows or any of its programs so I am merely presuming that a C compiler running under Microsoft Windows will produce a correctly named output file.  It might also produce a file named a.out unless told to name it something else.  For the rest of this lesson I will use the file name that would be used in Linux.  If you are using Microsoft Windows then you will need to adjust for this.
+
+If your program is defined to accept command line arguments, but you do not supply any, then argc will hold an integer value of one and argv will be a two dimensional array, the first of which will only have one element.  It is important to remember that arrays start with an index of zero.  In this case, the first dimension of the argv array will hold a pointer that points to a block of memory that holds a character array.  The first element in the second dimension of the argv array points to the beginning of that memory location.  This means that argv[ 0 ][ 0 ] holds a byte with a value of '/'.  If you were to use printf( "argv[ 0 ]: %s\n", argv[ 0 ] ); you would see: argv[ 0 ]: /user/bob/C/show_args with a newline character on the end of the string.
+
+You can see what a variable holds by printing its value.  Let's consider the following program:
+
+#include <stdio.h>  /* We need this so we can call printf(). */
+
+int main( int argc, char **argv )
+{
+     int pos;
+
+     printf( "argc: %d\n", argc );
+     for( pos = 0; pos < argc; pos++ )  /* pos != argc */
+     {
+          printf( "argv[ %d ]: %s\n", pos, argv[ pos ] );
+     }
+     return 0;  /* Successful exit. */
+}
+
+If you ran this program with: show_args Nice to meet you.
+you would see:
+
+argc: 5
+argv[ 0 ]: /user/bob/C/show_args
+argv[ 1 ]: Nice
+argv[ 2 ]: to
+argv[ 3 ]: meet
+argv[ 4 ]: you.
+
+presuming the previously mentioned conditions to be true.
+
+If you used printf( "%c", argv[ 1 ][ 0 ] ); you would see N.
+
+Certain characters have a special meaning to the command shell.  Be careful with wild card characters like * and ?.  You must also be careful with <, >, ', and ".  In Linux and UNIX you also need to be careful with ` and &.  Try running this show_args program with a * as a command line argument to see what happens.  Go ahead.  It won't cause any harm.
+
+The main() function _must_ return an integer number in every case, no matter what.  It is not acceptable to use void main() as this can cause undefined behavior.  The integer number returned by the main() function is called the exit code.  An exit code of zero means that the program ran and did its job without any errors occurring along the way.  A non-zero value for an exit code usually means that something went wrong.  The number most commonly used to indicate this condition is one, although a negative one may also be used by some programs.
+
+Many functions in C work this way.  They will return zero if all went well, or one or negative one if something went wrong.  Other functions like printf() will return a positive non-zero value if all went well, zero if nothing was printed, and a negative value if an error occurred.
+
+You should be able to read about whatever standard C function you wish to know about by reading its man (manual) page.  If you wanted to read about printf() you could type "man printf" (without the quotes) into the URL box in your web browser and select the correct option from the list of search results.
+
+The program's exit code may also be specified by using the exit() function, provided your program also includes stdlib.h.  Two integer exit codes are predefined for use: EXIT_SUCCESS which is defined to an integer value of zero, and EXIT_FAILURE which is defined to an integer value of one.
+
+The program's exit code is returned to the operating system (kernel) which may in turn make that information available to the calling program, which may be the user's command shell.  The calling program is the program (process) that called (ran) your program.
+
+If you are learning to write source code in the C programming language and you want your compiler to help you write your code with the correct syntax and usage, provided your compiler accepts each of these command line options, you should add the following command line options when compiling your programs: -pedantic -std=c17 -Wall if they are not already specified.  If your compiler does not accept the C17 standard then you need to update or replace your compiler.  You will need to use -lm as well if your program uses any of the functions in the math library prototyped in the include file math.h.
+
+<EOF>
