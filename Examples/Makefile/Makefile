@@ -6,11 +6,11 @@
 #
 # Compiler to use:
 #
-#CC = gcc
+CC = gcc
 #
 # Compiler flags:
 #
-CFLAGS = -c -pedantic -std=c11 -Wall
+CFLAGS = -c -pedantic -std=c17 -Wall
 #
 # Linker flags:
 #
@@ -45,12 +45,6 @@ objects: $(SRC)
 clean:
 	@echo "Cleaning up."
 	rm -f *.o example
-#
-# Define the install target.
-#
-#install: all
-#	@echo "Installing the executable binary file."
-#	mv example /data/data/com.n0n3m4.droidc/files/temp
 #
 # Other information about how to write and use a Makefile may be
 # found at https://opensource.com/article/18/8/what-how-makefile
