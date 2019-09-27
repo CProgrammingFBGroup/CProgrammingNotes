@@ -33,18 +33,29 @@ all: example
 example: objects
 	@echo "Linking object file with library files."
 	$(CC) $(LFLAGS) $(OBJ) -o example
+	@echo
 #
 # Define the objects target.
 #
 objects: $(SRC)
+	@echo
 	@echo "Compiling the source code file."
 	$(CC) $(CFLAGS) $(SRC)
+	@echo
 #
 # Define the clean target.
 #
 clean:
+	@echo
 	@echo "Cleaning up."
 	rm -f *.o example
+	@echo
+#
+# Define the install target.
+#
+#install: all
+#	@echo "Installing the executable binary file."
+#	mv example /data/data/com.n0n3m4.droidc/files/temp
 #
 # Other information about how to write and use a Makefile may be
 # found at https://opensource.com/article/18/8/what-how-makefile
