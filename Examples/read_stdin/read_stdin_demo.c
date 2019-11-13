@@ -28,8 +28,7 @@ int main( void )
           printf( "\nSomething went wrong." );
           if ( save_errno != 0 )
           {
-               printf( "  Error: %s.\n", strerror( save_errno ),
-                                              save_errno );
+               printf( "Error: %s.\n", strerror( save_errno ) );
           }
           else
           {
