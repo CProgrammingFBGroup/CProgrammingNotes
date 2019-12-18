@@ -163,6 +163,12 @@ You might want to write that into a function or define it in a macro.
 
 See Examples/strrev/strrev.c [here](https://github.com/CProgrammingFBGroup/CProgrammingNotes/blob/master/Examples/strrev/strrev.c)
 
+# 11. Why don't I get the result that I expect when I use something like a = ++a + a++; ?
+
+Using multiple increment, a++ or ++a, or decrement, a-- or --a, operators with the same variable in the same line of code will produce an undefined result which will vary from one compiler to another.
+
+Use multiple code statements like b = ++a; a++; a += b; instead.
+
 ## Another-C-FAQ
 
    [C-FAQ](http://c-faq.com/questions.html)
