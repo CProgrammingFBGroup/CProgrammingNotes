@@ -17,6 +17,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+/* Define REVERSE_SORT_ORDER to sort in descending order. */
+
+#undef REVERSE_SORT_ORDER
+
 /* This is the prototype for the callback function: */
 
 int compare( const void *arg1, const void *arg2 );
@@ -90,6 +94,14 @@ int compare( const void *arg1, const void *arg2 )
      /* Compare the strings. */
 
      ret = strcmp( str1, str2 );
+
+     /* Use descending order if requested. */
+
+#ifdef REVERSE_SORT_ORDER
+
+     ret = ret * ( -1 );
+
+#endif
 
      /* Return the result of the comparison. */
 
