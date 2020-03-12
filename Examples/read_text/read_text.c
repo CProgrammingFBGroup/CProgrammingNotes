@@ -27,8 +27,6 @@
 
      This function sets errno in the following ways:
 
-          Zero (0): Everything worked just fine.
-
           EBADF: fp is a NULL pointer.
 
           EFAULT: buffer is a NULL pointer.
@@ -39,7 +37,7 @@
 
           EBADFD: fp has an error condition.
 
-          EILSEQ: A NULL byte was encountered in the text stream.
+          EILSEQ: A null byte was encountered in the text stream.
 
           ENOBUFS: buffer filled up before a newline character was read.
 
@@ -145,6 +143,8 @@ int read_text( char *buffer, const int length, FILE *fp,
      }
 
      exit_loop = 0;
+     size = length - 1;  /* Leave room for the null byte. */
+
      do
      {
           if ( use_prompt == 1 )
@@ -157,7 +157,6 @@ int read_text( char *buffer, const int length, FILE *fp,
                }
           }
 
-          size = length - 1;  /* Leave room for the NULL byte. */
           for( pos = 0; exit_loop == 0 && pos < size; pos++ )
           {
                byte = fgetc( fp );
@@ -173,7 +172,7 @@ int read_text( char *buffer, const int length, FILE *fp,
                     errno = EBADFD;
                     return ( -1 );
                }
-               if ( byte == 0 )  /* We read a NULL byte. */
+               if ( byte == 0 )  /* We read a null byte. */
                {
                     buffer[ pos ] = 0;
                     errno = EILSEQ;
@@ -187,7 +186,8 @@ int read_text( char *buffer, const int length, FILE *fp,
                {
                     if ( pos == 0 )
                     {
-                         pos = size;
+                         buffer[ 0 ] = 0;
+                         exit_loop = 1;
                     }
                     else
                     {
@@ -195,9 +195,9 @@ int read_text( char *buffer, const int length, FILE *fp,
                          pos--;
                          exit_loop = 1;
                     }
-               }    /* if ( byte != 10 ) */
+               }    /* if ( byte != '\n' ) */
           }    /* for( pos = 0; exit_loop == 0 && pos < size; pos++ ) */
-     }    while( exit_loop == 0 || pos == ( size + 1 ) );
+     }    while( exit_loop == 0 || pos == length );
 
      if ( pos == size )  /* We ran out of room. */
      {
@@ -210,10 +210,6 @@ int read_text( char *buffer, const int length, FILE *fp,
           if ( feof( fp ) )
           {
                errno = ENODATA;
-          }
-          else
-          {
-               errno = 0;
           }
           return pos;  /* Successful exit. */
      }

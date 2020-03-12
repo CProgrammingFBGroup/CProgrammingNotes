@@ -10,10 +10,13 @@
 #include <stdio.h>
 #include <string.h>
 
+int read_text( char *buffer, const int length, FILE *fp, const char *prompt,
+               const int prompt_once );
+
 int main( void )
 {
      char buffer[ 1024 ];
-     int length, ret, save_errno, size;
+     int ret, save_errno;
 
      errno = 0;
      ret = read_text( buffer, 1024, stdin, "prompt >> ", 0 );
