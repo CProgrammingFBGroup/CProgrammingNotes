@@ -110,14 +110,20 @@ int read_text( char *buffer, const int length, FILE *fp,
           errno = EBADF;
           return ( -1 );
      }
-     if ( ferror( fp ) )
-     {
-          errno = EBADFD;
-          return ( -1 );
-     }
+
+     /* Check for end of file condition. */
+
      if ( feof( fp ) )
      {
           errno = ENODATA;
+          return ( -1 );
+     }
+
+     /* Check for error condition. */
+
+     if ( ferror( fp ) )
+     {
+          errno = EBADFD;
           return ( -1 );
      }
 
@@ -151,6 +157,7 @@ int read_text( char *buffer, const int length, FILE *fp,
           {
                printf( "%s", prompt );
                fflush( stdout );
+
                if ( prompt_once == 1 )
                {
                     use_prompt = 0;
@@ -166,18 +173,21 @@ int read_text( char *buffer, const int length, FILE *fp,
                     errno = ENODATA;
                     return pos;
                }
+
                if ( ferror( fp ) )
                {
                     buffer[ pos ] = 0;
                     errno = EBADFD;
                     return ( -1 );
                }
+
                if ( byte == 0 )  /* We read a null byte. */
                {
                     buffer[ pos ] = 0;
                     errno = EILSEQ;
                     return ( -1 );
                }
+
                if ( byte != '\n' )
                {
                     buffer[ pos ] = ( char )byte;
@@ -187,7 +197,7 @@ int read_text( char *buffer, const int length, FILE *fp,
                     if ( pos == 0 )
                     {
                          buffer[ 0 ] = 0;
-                         exit_loop = 1;
+                         break;
                     }
                     else
                     {
@@ -195,13 +205,16 @@ int read_text( char *buffer, const int length, FILE *fp,
                          pos--;
                          exit_loop = 1;
                     }
+
                }    /* if ( byte != '\n' ) */
+
           }    /* for( pos = 0; exit_loop == 0 && pos < size; pos++ ) */
-     }    while( exit_loop == 0 || pos == length );
+
+     }    while( exit_loop == 0 && pos < size );
 
      if ( pos == size )  /* We ran out of room. */
      {
-          buffer[ pos ] = 0;
+          buffer[ ( pos + 1 ) ] = 0;  /* Add the null byte. */
           errno = ENOBUFS;
           return pos;
      }

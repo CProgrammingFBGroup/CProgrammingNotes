@@ -21,26 +21,32 @@ int main( void )
      errno = 0;
      ret = read_text( buffer, 1024, stdin, "prompt >> ", 0 );
      save_errno = errno;
+
      if ( ret == ( -1 ) )
      {
           printf( "Something went wrong." );
+
           if ( save_errno != 0 )
           {
-               printf( "  Error: %s.\n", strerror( errno ) );
+               printf( "  Error: %s.\n", strerror( save_errno ) );
           }
           else
           {
                printf( "\n" );
           }
+
           return 1;
      }
+
      printf( "Received: \"%s\"\n", buffer );
      printf( "Number of bytes read: %d.\n", ret );
+
      if ( save_errno != 0 )
      {
-          printf( "Error message returned: %s.\n",
+          printf( "Error message saved by errno: %s.\n",
                   strerror( save_errno ) );
      }
+
      return 0;
 }
 
