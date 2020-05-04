@@ -93,14 +93,14 @@ char str[ 64 ];
 
 signed long int pos[ 64 ];
 
-const signed long int smallest = 8;
-const signed long int largest = 63;
+const signed int smallest = 8;
+const signed int largest = 63;
 
 int main( void )
 {
-     signed long int current, exit_inner_loop;
-     signed long int exit_outer_loop, last, num_choices;
-     register signed long int count;
+     signed int current, exit_inner_loop;
+     signed int exit_outer_loop, last, num_choices;
+     register signed int count;
 
 #ifdef SHOW_STATS
 
