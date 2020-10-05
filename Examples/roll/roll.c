@@ -329,6 +329,10 @@ The data file \"%s\" is corrupt.\nRemoving it...\n", fname );
      {
           fp = NULL;  /* Initialize to NULL. */
 
+          /* We will need a random number seed. */
+
+          make_random_seed();
+
      }    /* if ( fname[ 0 ] != 0 ) */
 
      /*
