@@ -4,11 +4,19 @@
      Rolls the dice.
      Written by Matthew Campbell on Tuesday June 25, 2019.
 
+     Updated on Monday October 5, 2020 to use $HOME.
+
+     If the HOME environment variable is defined and it does not point to
+     an empty string then the data file will be $HOME/DATA_FILE as #defined
+     below.  If HOME does not exist or points to an empty string then a
+     data file will not be used.
+
 */
 
 /* snprintf(3) needs this: */
 
-#define _BSD_SOURCE
+#define _DEFAULT_SOURCE
+#undef _BSD_SOURCE       /* gcc says using _BSD_SOURCE is deprecated. */
 
 /* Include the necessary header files: */
 
@@ -30,9 +38,9 @@
 #define EINVAL 22
 #endif
 
-/* This is the name of the data file to use: */
+/* This is the name of the data file to use in $HOME/: */
 
-#define DATA_FILE "rolldata"
+#define DATA_FILE ".rolldata"
 
 #define USAGE "\
 Usage: roll mdn | 1 <= m <= 10 & 2 <= n <= 25\n\
@@ -40,7 +48,7 @@ Usage: roll mdn | 1 <= m <= 10 & 2 <= n <= 25\n\
 
 /* Function prototypes: */
 
-int  close_data_file( FILE **fp );
+int  close_data_file( FILE **fp, char *fname );
 void make_random_seed( void );
 
 /* Function definitions: */
@@ -48,8 +56,9 @@ void make_random_seed( void );
 int main( int argc, char **argv )
 {
      FILE *fp;
-     char buffer[ 12 ];
+     char buffer[ 12 ], *env, fname[ 1025 ];
      int array[ 10 ], count, len, m, n, num, ret, save_errno, total;
+     size_t size;
      struct stat stat_buf;
      time_t seed;
 
@@ -89,171 +98,144 @@ int main( int argc, char **argv )
           exit( EXIT_FAILURE );
      }
 
-     /* See if our data file exists. */
+     /* See if the HOME environment variable is defined. */
 
-     errno = 0;
-     ret = stat( DATA_FILE, &stat_buf );
-     save_errno = errno;
-     if ( ret != 0 )
+     env = getenv( "HOME" );
+
+     if ( env == NULL || env[ 0 ] == 0 )
      {
-          if ( save_errno != ENOENT )
-          {
-               printf( "\
-Something went wrong while looking for the data file \"%s\".\n",
-                       DATA_FILE );
-               if ( save_errno != 0 )
-               {
-                    printf( "Error: %s.\n", strerror( save_errno ) );
-               }
-               exit( EXIT_FAILURE );
-          }
-
-          /* The file does not exist so it will need to be created. */
-
-          errno = 0;
-          fp = fopen( DATA_FILE, "w" );
-          save_errno = errno;
-          if ( fp == NULL )
-          {
-               printf( "Failed to create the data file \"%s\".\n",
-                       DATA_FILE );
-               if ( save_errno != 0 )
-               {
-                    printf( "Error: %s.\n", strerror( save_errno ) );
-               }
-               exit( EXIT_FAILURE );
-          }
-
-          /* We will need a random number seed. */
-
-          make_random_seed();
+          fname[ 0 ] = 0;  /* Initialize to null. */
      }
-     else  /* ret == 0 */
+     else  /* Determine the file name to store the seed data in. */
      {
-          /* Open the data file. */
+          size = strlen( env );
+
+          if ( ( size + strlen( DATA_FILE ) + 1 ) <= 1024 )
+          {
+               strcpy( fname, env );
+               fname[ ( size++ ) ] = '/';
+               strcpy( &fname[ size ], DATA_FILE );
+               size += strlen( DATA_FILE );
+               fname[ size ] = 0;
+          }
+          else
+          {
+               fname[ 0 ] = 0;  /* Initialize to null. */
+          }
+
+     }
+
+     if ( fname[ 0 ] != 0 )
+     {
+          /* See if our data file exists. */
 
           errno = 0;
-          fp = fopen( DATA_FILE, "r" );
+          ret = stat( fname, &stat_buf );
           save_errno = errno;
-          if ( fp == NULL )
+
+          if ( ret != 0 )
           {
-               printf( "Failed to open the data file \"%s\".\n",
-                       DATA_FILE );
-               if ( save_errno != 0 )
-               {
-                    printf( "Error: %s.\n", strerror( save_errno ) );
-               }
-               exit( EXIT_FAILURE );
-          }
 
-          /* Read the number stored in the data file. */
-
-          errno = 0;
-          ret = fscanf( fp, "%d", &num );
-          save_errno = errno;
-          if ( ret == ( -1 ) )
-          {
-               printf( "\
-Something went wrong while reading from the data file \"%s\".\n\
-Removing it...\n",
-                       DATA_FILE );
-               if ( save_errno != 0 )
-               {
-                    printf( "Error: %s.\n", strerror( save_errno ) );
-               }
-
-               /* Close the data file. */
-
-               ret = close_data_file( &fp );
-               if ( ret != 0 )
-               {
-                    abort();  /* Crash and burn. */
-               }
-
-               /* Start fresh with a new seed and a blank data file. */
-
-               errno = 0;
-               fp = fopen( DATA_FILE, "w" );
-               save_errno = errno;
-               if ( fp == NULL )
-               {
-                    printf( "Failed to reset the data file \"%s\".\n",
-                            DATA_FILE );
-                    if ( save_errno != 0 )
-                    {
-                         printf( "Error: %s.\n", strerror( save_errno ) );
-                    }
-                    exit( EXIT_FAILURE );
-               }
-
-               /* We will need a random number seed. */
-
-               make_random_seed();
-          }
-          else if ( ret == 0 )
-          {
-               printf( "\
-The data file \"%s\" is corrupt.  Removing it...\n", DATA_FILE );
-               ret = close_data_file( &fp );
-               if ( ret != 0 )
-               {
-                    abort();  /* Crash and burn. */
-               }
-
-               /* Start fresh with a new seed and a blank data file. */
-
-               errno = 0;
-               fp = fopen( DATA_FILE, "w" );
-               save_errno = errno;
-               if ( fp == NULL )
-               {
-                    printf( "Failed to reset the data file \"%s\".\n",
-                            DATA_FILE );
-                    if ( save_errno != 0 )
-                    {
-                         printf( "Error: %s.\n", strerror( save_errno ) );
-                    }
-                    exit( EXIT_FAILURE );
-               }
-
-               /* We will need a random number seed. */
-
-               make_random_seed();
-          }
-          else  /* ret == 1 */
-          {
-               /* Make sure the stored number is valid. */
-
-               if ( num == ( unsigned int )( -1 ) )
+               if ( save_errno != ENOENT )
                {
                     printf( "\
-The data file \"%s\" is corrupt.  Removing it...\n", DATA_FILE );
-                    ret = close_data_file( &fp );
+Something went wrong while looking for the data file \"%s\".\n", fname );
+
+                    if ( save_errno != 0 )
+                    {
+                         printf( "Error: %s.\n", strerror( save_errno ) );
+                    }
+
+                    exit( EXIT_FAILURE );
+               }
+
+               /* The file does not exist so it will need to be created. */
+
+               errno = 0;
+               fp = fopen( fname, "w" );
+               save_errno = errno;
+
+               if ( fp == NULL )
+               {
+                    printf( "Failed to create the data file \"%s\".\n",
+                            fname );
+
+                    if ( save_errno != 0 )
+                    {
+                         printf( "Error: %s.\n", strerror( save_errno ) );
+                    }
+
+                    exit( EXIT_FAILURE );
+               }
+
+               /* We will need a random number seed. */
+
+               make_random_seed();
+          }
+          else  /* ret == 0 */
+          {
+               /* Open the data file. */
+
+               errno = 0;
+               fp = fopen( fname, "r" );
+               save_errno = errno;
+
+               if ( fp == NULL )
+               {
+                    printf( "Failed to open the data file \"%s\".\n",
+                            fname );
+
+                    if ( save_errno != 0 )
+                    {
+                         printf( "Error: %s.\n", strerror( save_errno ) );
+                    }
+
+                    exit( EXIT_FAILURE );
+               }
+
+               /* Read the number stored in the data file. */
+
+               errno = 0;
+               ret = fscanf( fp, "%d", &num );
+               save_errno = errno;
+
+               if ( ret == ( -1 ) )
+               {
+                    printf( "\
+Something went wrong while reading from the data file \"%s\".\n\
+Removing it...\n", fname );
+
+                    if ( save_errno != 0 )
+                    {
+                         printf( "Error: %s.\n", strerror( save_errno ) );
+                    }
+
+                    /* Close the data file. */
+
+                    ret = close_data_file( &fp, fname );
+
                     if ( ret != 0 )
                     {
                          abort();  /* Crash and burn. */
                     }
 
-                    /*
-
-                         Start fresh with a new seed
-                         and a blank data file.
-
-                    */
+                    /* Start fresh with a new seed and a blank data file. */
 
                     errno = 0;
-                    fp = fopen( DATA_FILE, "w" );
+                    fp = fopen( fname, "w" );
                     save_errno = errno;
+
                     if ( fp == NULL )
                     {
-                         printf( "\
-Failed to reset the data file \"%s\".\n",
-                                 DATA_FILE );
+                         printf( "Failed to reset the data file \"%s\".\n",
+                                 fname );
+
                          if ( save_errno != 0 )
                          {
                               printf( "Error: %s.\n",
                                       strerror( save_errno ) );
                          }
+
                          exit( EXIT_FAILURE );
                     }
 
@@ -261,7 +243,42 @@ Failed to reset the data file \"%s\".\n",
 
                     make_random_seed();
                }
-               else  /* num != ( unsigned int )( -1 ) */
+               else if ( ret == 0 )
+               {
+                    printf( "\
+The data file \"%s\" is corrupt.\nRemoving it...\n", fname );
+                    ret = close_data_file( &fp, fname );
+
+                    if ( ret != 0 )
+                    {
+                         abort();  /* Crash and burn. */
+                    }
+
+                    /* Start fresh with a new seed and a blank data file. */
+
+                    errno = 0;
+                    fp = fopen( fname, "w" );
+                    save_errno = errno;
+
+                    if ( fp == NULL )
+                    {
+                         printf( "Failed to reset the data file \"%s\".\n",
+                                 fname );
+
+                         if ( save_errno != 0 )
+                         {
+                              printf( "Error: %s.\n",
+                                      strerror( save_errno ) );
+                         }
+
+                         exit( EXIT_FAILURE );
+                    }
+
+                    /* We will need a random number seed. */
+
+                    make_random_seed();
+               }
+               else  /* ret == 1 */
                {
                     /* Initialize the random number generator. */
 
@@ -276,7 +293,8 @@ Failed to reset the data file \"%s\".\n",
 
                     */
 
-                    ret = close_data_file( &fp );
+                    ret = close_data_file( &fp, fname );
+
                     if ( ret != 0 )
                     {
                          abort();
@@ -285,32 +303,44 @@ Failed to reset the data file \"%s\".\n",
                     /* Open the data file for writing. */
 
                     errno = 0;
-                    fp = fopen( DATA_FILE, "w" );
+                    fp = fopen( fname, "w" );
                     save_errno = errno;
+
                     if ( fp == NULL )
                     {
-                         printf( "\
-Failed to reset the data file \"%s\".\n", DATA_FILE );
+                         printf( "Failed to reset the data file \"%s\".\n",
+                                 fname );
+
                          if ( save_errno != 0 )
                          {
                               printf( "Error: %s.\n",
                                       strerror( save_errno ) );
                          }
+
                          exit( EXIT_FAILURE );
                     }
-               }    /* if ( num == ( unsigned int )( -1 ) ) */
-          }    /* if ( ret == ( -1 ) ) */
-     }    /* if ( ret != 0 ) */
+
+               }    /* if ( ret == ( -1 ) ) */
+
+          }    /* if ( ret != 0 ) */
+
+     }
+     else  /* fname[ 0 ] == 0 */
+     {
+          fp = NULL;  /* Initialize to NULL. */
+
+     }    /* if ( fname[ 0 ] != 0 ) */
 
      /*
 
           At this point the random number generator is initialized,
           the data file has a length of zero bytes and it is open
-          for writing.
+          for writing, unless a data file is not being used.
 
      */
 
      total = 0;
+
      for( count = 0; count < m; count++ )
      {
           num = rand();
@@ -318,83 +348,102 @@ Failed to reset the data file \"%s\".\n", DATA_FILE );
           total = total + array[ count ];
      }
 
-     /* Save the last number generated for the next use. */
-
-     errno = 0;
-     count = snprintf( buffer, len, "%d\n", num );
-     save_errno = errno;
-     if ( count < 2 )
+     if ( fp != NULL )
      {
-          printf( "Failed to save the last number generated.\n" );
-          if ( save_errno != 0 )
+          /* Save the last number generated for the next use. */
+
+          errno = 0;
+          count = snprintf( buffer, len, "%d\n", num );
+          save_errno = errno;
+
+          if ( count < 2 )
           {
-               printf( "Error: %s.\n", strerror( save_errno ) );
+               printf( "Failed to save the last number generated.\n" );
+
+               if ( save_errno != 0 )
+               {
+                    printf( "Error: %s.\n", strerror( save_errno ) );
+               }
+
+               ret = close_data_file( &fp, fname );
+
+               if ( ret != 0 )
+               {
+                    abort();
+               }
+
+               exit( EXIT_FAILURE );
           }
 
-          ret = close_data_file( &fp );
+          errno = 0;
+          ret = fprintf( fp, "%s", buffer );
+          save_errno = errno;
+
+          if ( count != ret )
+          {
+               printf( "Failed to save the last number generated.\n" );
+
+               if ( save_errno != 0 )
+               {
+                    printf( "Error: %s.\n", strerror( save_errno ) );
+               }
+
+               ret = close_data_file( &fp, fname );
+
+               if ( ret != 0 )
+               {
+                    abort();
+               }
+
+               exit( EXIT_FAILURE );
+          }
+
+          /* Write out any data in the buffer. */
+
+          errno = 0;
+          fflush( fp );
+          save_errno = errno;
+
+          if ( ferror( fp ) )
+          {
+               printf( "Failed to save the last number generated.\n" );
+
+               if ( save_errno != 0 )
+               {
+                    printf( "Error: %s.\n", strerror( save_errno ) );
+               }
+
+               ret = close_data_file( &fp, fname );
+
+               if ( ret != 0 )
+               {
+                    abort();
+               }
+
+               exit( EXIT_FAILURE );
+          }
+
+          /* Close the data file. */
+
+          ret = close_data_file( &fp, fname );
+
           if ( ret != 0 )
           {
                abort();
           }
-          exit( EXIT_FAILURE );
-     }
 
-     errno = 0;
-     ret = fprintf( fp, "%s", buffer );
-     save_errno = errno;
-     if ( count != ret )
-     {
-          printf( "Failed to save the last number generated.\n" );
-          if ( save_errno != 0 )
-          {
-               printf( "Error: %s.\n", strerror( save_errno ) );
-          }
-
-          ret = close_data_file( &fp );
-          if ( ret != 0 )
-          {
-               abort();
-          }
-          exit( EXIT_FAILURE );
-     }
-
-     /* Write out any data in the buffer. */
-
-     errno = 0;
-     fflush( fp );
-     save_errno = errno;
-     if ( ferror( fp ) )
-     {
-          printf( "Failed to save the last number generated.\n" );
-          if ( save_errno != 0 )
-          {
-               printf( "Error: %s.\n", strerror( save_errno ) );
-          }
-
-          ret = close_data_file( &fp );
-          if ( ret != 0 )
-          {
-               abort();
-          }
-          exit( EXIT_FAILURE );
-     }
-
-     /* Close the data file. */
-
-     ret = close_data_file( &fp );
-     if ( ret != 0 )
-     {
-          abort();
-     }
+     }    /* if ( fp != NULL ) */
 
      /* Display the results. */
 
      printf( "Total: %d.  Rolled: ({ ", total );
      num = m - 1;
+
      for( count = 0; count < num; count++ )
      {
           printf( "%d, ", array[ count ] );
      }
+
      printf( "%d })\n", array[ num ] );
 
      /* And we're done. */
@@ -409,7 +458,7 @@ Failed to reset the data file \"%s\".\n", DATA_FILE );
 
 */
 
-int close_data_file( FILE **fp )
+int close_data_file( FILE **fp, char *fname )
 {
      int ret, save_errno;
 
@@ -434,17 +483,20 @@ int close_data_file( FILE **fp )
      errno = 0;
      ret = fclose( *fp );
      save_errno = errno;
+
      if ( ret != 0 )
      {
-          printf( "Failed to close the data file \"%s\".\n",
-                  DATA_FILE );
+          printf( "Failed to close the data file \"%s\".\n", fname );
+
           if ( save_errno != 0 )
           {
                printf( "Error: %s.\n", strerror( save_errno ) );
           }
+
           errno = save_errno;
           return ( -1 );
      }
+
      *fp = NULL;
      errno = save_errno;
      return 0;
@@ -465,17 +517,21 @@ void make_random_seed( void )
      errno = 0;
      seed = time( NULL );
      save_errno = errno;
+
      if ( seed == ( time_t )( -1 ) )
      {
           printf( "Failed to generate a random seed.\n" );
+
           if ( save_errno != 0 )
           {
                printf( "Error: %s.\n", strerror( save_errno ) );
           }
+
           exit( EXIT_FAILURE );
      }
 
      srand( ( unsigned int )seed );
+
      return;
 }
 
